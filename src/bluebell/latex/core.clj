@@ -1,7 +1,16 @@
 (ns bluebell.latex.core
   (:require [clojure.spec :as spec]))
 
-(def reserved [:opt :arg :begin])
+(defn prefixed [p sp]
+  (spec/cat :prefix (partial = p)
+            :value sp))
+
+(def reserved [:opt    ;; Optional arg prefix
+               :arg    ;; Extra arg prefix
+               :cat    ;; Used to concatenate forms
+               :lower  ;; Lower, that is _
+               :upper  ;; Upper, that is ^
+               ])
 
 (defn reserved? [x]
   (contains? reserved x))
@@ -17,19 +26,21 @@
 (spec/def ::opt-arg (spec/or :map ::opt-arg-map
                              :string ::string))
 
-(spec/def ::opt-args (spec/* (spec/cat :opt-tag (partial = :opt)
-                                       :opt-arg ::opt-arg)))
-
 (spec/def ::form (spec/or :command ::command
                           :string ::string))
 
 (spec/def ::forms (spec/* ::form))
-(spec/def ::rest-forms (spec/* (spec/cat :arg-tag (partial = :arg)
-                                         :form ::form)))
+(spec/def ::rest-forms (spec/* (prefixed :arg ::form)))
 
 (spec/def ::args (spec/cat :first ::forms
                            :rest ::rest-forms))
 
+(spec/def ::command-setting (spec/or :opt-arg (prefixed :opt ::opt-arg)
+                                     :lower (prefixed :lower ::form)
+                                     :upper (prefixed :upper ::form)))
+
+(spec/def ::command-settings (spec/* ::command-setting))
+
 (spec/def ::command (spec/cat :name ::identifier
-                              :opt-args ::opt-args
+                              :settings ::command-settings
                               :args ::args))
