@@ -26,8 +26,12 @@
 (spec/def ::opt-arg (spec/or :map ::opt-arg-map
                              :string ::string))
 
+(spec/def ::cat (spec/spec (spec/cat :prefix (partial = :cat)
+                                     :forms ::forms)))
+
 (spec/def ::form (spec/or :command ::command
-                          :string ::string))
+                          :string ::string
+                          :cat ::cat))
 
 (spec/def ::forms (spec/* ::form))
 (spec/def ::rest-forms (spec/* (prefixed :arg ::form)))
