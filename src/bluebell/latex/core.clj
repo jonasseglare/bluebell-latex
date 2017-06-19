@@ -39,9 +39,9 @@
 (spec/def ::args (spec/cat :first ::forms
                            :rest ::rest-forms))
 
-(spec/def ::command-setting (spec/or :opt-arg (prefixed :opt ::opt-arg)
-                                     :lower (prefixed :lower ::form)
-                                     :upper (prefixed :upper ::form)))
+(spec/def ::command-setting (spec/alt :opt-arg (prefixed :opt ::opt-arg)
+                                      :lower (prefixed :lower ::form)
+                                      :upper (prefixed :upper ::form)))
 
 (spec/def ::command-settings (spec/* ::command-setting))
 
