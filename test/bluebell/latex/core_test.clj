@@ -4,4 +4,5 @@
             [clojure.test :refer :all]))
 
 (deftest spec-test
-  (is (spec/valid? ::latex/command-setting [:opt "asdffasd"])))
+  (is (spec/valid? ::latex/command-setting [:opt "asdffasd"]))
+  (is (spec/valid? ::latex/command-setting [:lower "asdf"])))
