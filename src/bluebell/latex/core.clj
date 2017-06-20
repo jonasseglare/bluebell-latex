@@ -10,6 +10,7 @@
                :cat    ;; Used to concatenate forms
                :lower  ;; Lower, that is _
                :upper  ;; Upper, that is ^
+               :body   ;; for the begin form
                ])
 
 (defn reserved? [x]
@@ -47,4 +48,8 @@
 
 (spec/def ::command (spec/cat :name ::identifier
                               :settings ::command-settings
-                              :args ::args))
+                              :args ::args
+                              :body (spec/? (prefixed :body ::forms))))
+
+(defn parse [x]
+  (spec/conform ::form x))
