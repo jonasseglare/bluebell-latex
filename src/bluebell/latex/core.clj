@@ -1,5 +1,6 @@
 (ns bluebell.latex.core
-  (:require [clojure.spec :as spec]))
+  (:require [clojure.spec :as spec]
+            [bluebell.utils.defmultiple :as defmultiple]))
 
 (defn prefixed [p sp]
   (spec/cat :prefix (partial = p)
@@ -23,22 +24,23 @@
 
 (spec/def ::string string?)
 (spec/def ::opt-arg-map map?)
+(spec/def ::number number?)
+
 
 (spec/def ::opt-arg (spec/or :map ::opt-arg-map
                              :string ::string))
 
-(spec/def ::cat (spec/spec (spec/cat :prefix (partial = :cat)
-                                     :forms ::forms)))
+(spec/def ::compound (spec/coll-of ::form))
 
 (spec/def ::form (spec/or :command ::command
                           :string ::string
-                          :cat ::cat))
+                          :number ::number
+                          :compound ::compound))
 
 (spec/def ::forms (spec/* ::form))
 (spec/def ::rest-forms (spec/* (prefixed :arg ::form)))
 
-(spec/def ::args (spec/cat :first ::forms
-                           :rest ::rest-forms))
+(spec/def ::args ::forms)
 
 (spec/def ::command-setting (spec/alt :opt-arg (prefixed :opt ::opt-arg)
                                       :lower (prefixed :lower ::form)
@@ -53,3 +55,19 @@
 
 (defn parse [x]
   (spec/conform ::form x))
+
+(defn compile-command [x]
+  x)
+
+(defn compile-cat [x] x)
+
+(defmultiple/defmultiple compile-form first
+  (:command [[_ x]] (compile-command x))
+  (:string [[_ x]] x)
+  (:number [[_ x]] (str x))
+  (:cat [[_ x]] (compile-cat x)))
+
+(defn full-compile [x]
+  (-> x
+      parse
+      compile-form))
