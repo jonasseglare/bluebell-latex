@@ -8,7 +8,6 @@
 
 (def reserved [:opt    ;; Optional arg prefix
                :arg    ;; Extra arg prefix
-               :cat    ;; Used to concatenate forms
                :lower  ;; Lower, that is _
                :upper  ;; Upper, that is ^
                :body   ;; for the begin form
@@ -59,13 +58,13 @@
 (defn compile-command [x]
   x)
 
-(defn compile-cat [x] x)
+(defn compile-compound [x] x)
 
 (defmultiple/defmultiple compile-form first
   (:command [[_ x]] (compile-command x))
   (:string [[_ x]] x)
   (:number [[_ x]] (str x))
-  (:cat [[_ x]] (compile-cat x)))
+  (:compound [[_ x]] (compile-compound x)))
 
 (defn full-compile [x]
   (-> x
