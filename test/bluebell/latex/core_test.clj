@@ -25,4 +25,6 @@
   (is (= "\\rulle_{n = 0}^{10}" (full-compile [:rulle :lower "n = 0" :upper "10"])))
   (is (= "\\rulle[package=mjao]"
          (full-compile [:rulle :opt {:package "mjao"}])))
-  (is (= "\\rulle[mjao]" (full-compile [:rulle :opt "mjao"]))))
+  (is (= "\\rulle[mjao]" (full-compile [:rulle :opt "mjao"])))
+  (is (= (full-compile [:begin "center" :body "Kattskit!"])
+         "\\begin{center}Kattskit!\\end{center}")))

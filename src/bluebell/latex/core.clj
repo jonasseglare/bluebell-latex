@@ -106,10 +106,17 @@
 (defn make-args [x]
   (apply str (map to-arg x)))
 
+(defn make-body [name body]
+  (if body
+    (str (apply str (map compile-form (:value body)))
+         "\\end{" (compile-form name) "}")
+    ""))
+
 (defn compile-command [x]
   (str "\\" (identifier-to-str (:name x))
        (make-optional-args (:settings x))
-       (make-args (:args  x))))
+       (make-args (:args  x))
+       (make-body (first (:args x)) (:body x))))
 
 
 (defn compile-compound [x]
