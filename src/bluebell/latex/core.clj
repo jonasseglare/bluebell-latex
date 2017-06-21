@@ -7,7 +7,6 @@
             :value sp))
 
 (def reserved [:opt    ;; Optional arg prefix
-               :arg    ;; Extra arg prefix
                :lower  ;; Lower, that is _
                :upper  ;; Upper, that is ^
                :body   ;; for the begin form
@@ -34,7 +33,22 @@
   (:id [[_ x]] (:value x)))
 
 (spec/def ::string string?)
-(spec/def ::opt-arg-map map?)
+
+(spec/def ::arg-key (spec/or :keyword keyword?
+                             :string string?))
+
+(defmultiple/defmultiple arg-key-to-str first
+  (:keyword [[_ x]] (name x))
+  (:string [[_ x]] x))
+
+(spec/def ::arg-value (spec/or :string string?
+                               :number number?))
+
+(defmultiple/defmultiple arg-value-to-str first
+  (:string [[_ x]] x)
+  (:number [[_ x]] (str x)))
+
+(spec/def ::opt-arg-map (spec/map-of ::arg-key ::arg-value))
 (spec/def ::number number?)
 
 
@@ -49,7 +63,6 @@
                           :compound ::compound))
 
 (spec/def ::forms (spec/* ::form))
-(spec/def ::rest-forms (spec/* (prefixed :arg ::form)))
 
 (spec/def ::args ::forms)
 
@@ -71,7 +84,9 @@
 
 (defn comma [a b] (str a "," b))
 
-(defn to-assignment [[k v]] (str (name k) "=" v))
+(defn to-assignment [[k v]]
+  (str (arg-key-to-str (spec/conform ::arg-key  k))
+       "=" (arg-value-to-str  v)))
 
 (defmultiple/defmultiple make-opt-arg first
   (:map [[_ x]] (str "[" (reduce comma (map to-assignment x)) "]"))
