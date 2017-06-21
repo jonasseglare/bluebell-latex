@@ -18,8 +18,20 @@
 
 (def not-reserved? (complement reserved?))
 
-(spec/def ::identifier (spec/and keyword?
-                                 not-reserved?))
+(spec/def ::id (spec/cat :prefix (partial = ::id)
+                         :value string?))
+
+(spec/def ::identifier (spec/or :keyword (spec/and keyword?
+                                                   #(not (qualified-keyword? %))
+                                                   not-reserved?)
+                                :id ::id))
+
+(defn id [x]
+  [::id x])
+
+(defmultiple/defmultiple identifier-to-str first
+  (:keyword [[_ x]] (name x))
+  (:id [[_ x]] (:value x)))
 
 (spec/def ::string string?)
 (spec/def ::opt-arg-map map?)
@@ -58,7 +70,10 @@
 (defn compile-command [x]
   x)
 
-(defn compile-compound [x] x)
+(declare compile-form)
+
+(defn compile-compound [x]
+  (apply str (map compile-form x)))
 
 (defmultiple/defmultiple compile-form first
   (:command [[_ x]] (compile-command x))

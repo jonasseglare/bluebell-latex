@@ -13,6 +13,11 @@
          [:compound [[:string "asdf"] [:string "asdf"]]]))
   (is (spec/valid? ::latex/command [:begin "document" :body "This is the title" "some more"])))
 
+(deftest id-test
+  (is (= "rulle" (identifier-to-str (spec/conform ::latex/identifier (id "rulle")))))
+  (is (= "rulle" (identifier-to-str (spec/conform ::latex/identifier :rulle)))))
+
 (deftest compiling
-  (is (= "mjao" (full-compile "mjao")))
-  (is (= "9" (full-compile 9))))
+  (is (= "mjao" (full-compile "mjao"))) ; string
+  (is (= "9" (full-compile 9))); number
+  (is (= "abc9k" (full-compile ["abc" 9 ["k"]])))) ; Compound
