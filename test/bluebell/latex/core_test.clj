@@ -20,4 +20,8 @@
 (deftest compiling
   (is (= "mjao" (full-compile "mjao"))) ; string
   (is (= "9" (full-compile 9))); number
-  (is (= "abc9k" (full-compile ["abc" 9 ["k"]])))) ; Compound
+  (is (= "abc9k" (full-compile ["abc" 9 ["k"]]))) ; Compound
+  (is (= "\\rulle{a}" (full-compile [:rulle ["a"]])))
+  (is (= "\\rulle_{n = 0}^{10}" (full-compile [:rulle :lower "n = 0" :upper "10"])))
+  (is (= "\\rulle[package=mjao]"
+         (full-compile [:rulle :opt {:package "mjao"}]))))

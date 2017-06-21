@@ -67,10 +67,35 @@
 (defn parse [x]
   (spec/conform ::form x))
 
-(defn compile-command [x]
-  x)
-
 (declare compile-form)
+
+(defn comma [a b] (str a "," b))
+
+(defn to-assignment [[k v]] (str (name k) "=" v))
+
+(defmultiple/defmultiple make-opt-arg first
+  (:map [[_ x]] (str "[" (reduce comma (map to-assignment x)) "]"))
+  (:string [[_ x]] (str "[" x "]")))
+
+(defmultiple/defmultiple make-setting first
+  (:opt-arg [[_ x]] (make-opt-arg (:value x)))
+  (:lower [[_ x]] (str "_{" (compile-form (:value  x)) "}"))
+  (:upper [[_ x]] (str "^{" (compile-form (:value  x)) "}")))
+
+(defn make-optional-args [x]
+  (apply str (map make-setting x)))
+
+(defn to-arg [x]
+  (str "{" (compile-form x) "}"))
+
+(defn make-args [x]
+  (apply str (map to-arg x)))
+
+(defn compile-command [x]
+  (str "\\" (identifier-to-str (:name x))
+       (make-optional-args (:settings x))
+       (make-args (:args  x))))
+
 
 (defn compile-compound [x]
   (apply str (map compile-form x)))
