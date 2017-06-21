@@ -27,4 +27,4 @@
          (full-compile [:rulle :opt {:package "mjao"}])))
   (is (= "\\rulle[mjao]" (full-compile [:rulle :opt "mjao"])))
   (is (= (full-compile [:begin "center" :body "Kattskit!"])
-         "\\begin{center}Kattskit!\\end{center}")))
+         "\\begin{center}\nKattskit!\n\\end{center}")))

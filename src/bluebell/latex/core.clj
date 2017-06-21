@@ -12,6 +12,12 @@
                :body   ;; for the begin form
                ])
 
+(defn cat-with-break [a b]
+  (str a "\n" b))
+
+(defn str-lines [& args]
+  (reduce cat-with-break (map str args)))
+
 (defn reserved? [x]
   (contains? reserved x))
 
@@ -108,8 +114,8 @@
 
 (defn make-body [name body]
   (if body
-    (str (apply str (map compile-form (:value body)))
-         "\\end{" (compile-form name) "}")
+    (str "\n" (apply str-lines (map compile-form (:value body)))
+         "\n\\end{" (compile-form name) "}")
     ""))
 
 (defn compile-command [x]
