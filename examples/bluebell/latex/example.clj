@@ -14,14 +14,15 @@
 
 (defn tikz-demo []
   (io-utils/display
-   [:begin "tikzpicture" :body
-    [[:draw {:style "dashed"}]
-     "(2, .5) circle (0.5);"
+   [[:usepackage "tikz"]
+    [:begin "tikzpicture" :body
+     [[:draw :opt {:style "dashed"}]
+      "(2, .5) circle (0.5);"
 
-     [:draw {:fill "green!50"}]
-     "(1, 1)" "ellipse (.5 and 1);"
+      [:draw :opt {:fill "green!50"}]
+      "(1, 1)" "ellipse (.5 and 1);"
 
-     ]]))
+      ]]]))
 ;; begin{tikzpicture}
 ;; \draw[style=dashed] (2,.5) circle (0.5);
 ;; \draw[fill=green!50] (1,1)

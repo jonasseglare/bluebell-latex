@@ -12,11 +12,14 @@
                :body   ;; for the begin form
                ])
 
-(defn cat-with-break [a b]
-  (str a "\n" b))
+(defn str-sep [sep args]
+  (reduce #(str %1 sep %2) (map str args)))
 
 (defn str-lines [& args]
-  (reduce cat-with-break (map str args)))
+  (str-sep "\n" args))
+
+(defn str-space [& args]
+  (str-sep " " args))
 
 (defn reserved? [x]
   (contains? reserved x))
@@ -126,7 +129,7 @@
 
 
 (defn compile-compound [x]
-  (apply str (map compile-form x)))
+  (apply str-space (map compile-form x)))
 
 (defmultiple/defmultiple compile-form first
   (:command [[_ x]] (compile-command x))

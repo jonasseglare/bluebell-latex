@@ -2,6 +2,7 @@
   (:import [java.awt Desktop])
   (:require [bluebell.latex.core :as latex]
             [clojure.java.io :as io]
+            [bluebell.tag.core :as tag]
             [clojure.java.shell :as shell]))
 
 (defn with-suffix [basename suf]
@@ -40,6 +41,8 @@
   ([code settings]
    (let [output (to-pdf code settings)]
      (if (= 0 (-> output :output-data :exit))
-       (.open (Desktop/getDesktop) (io/file (full-name settings ".pdf"))))))
+       (do (.open (Desktop/getDesktop) (io/file (full-name settings ".pdf")))
+           (tag/tag-success output))
+       (tag/tag-failure output))))
   ([code]
    (display code settings)))
