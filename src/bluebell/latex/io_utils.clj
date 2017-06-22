@@ -46,3 +46,7 @@
        (tag/tag-failure output))))
   ([code]
    (display code settings)))
+
+(defn display-silent [& args]
+  (do (apply display args)
+      nil))
