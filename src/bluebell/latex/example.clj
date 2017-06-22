@@ -1,5 +1,6 @@
 (ns bluebell.latex.example
   (:require [bluebell.latex.core :as latex]
+            [bluebell.latex.utils :as utils]
             [bluebell.latex.io-utils :as io-utils]))
 
 (def testdoc [[:documentclass :opt "a4paper" "article"]
@@ -14,7 +15,8 @@
 
 (defn tikz-demo []
   (io-utils/display
-   [[:usepackage "tikz"]
+   (utils/standalone
+    [:usepackage "tikz"]
     [:begin "tikzpicture" :body
      [[:draw :opt {:style "dashed"}]
       "(2, .5) circle (0.5);"
@@ -22,7 +24,7 @@
       [:draw :opt {:fill "green!50"}]
       "(1, 1)" "ellipse (.5 and 1);"
 
-      ]]]))
+      ]])))
 ;; begin{tikzpicture}
 ;; \draw[style=dashed] (2,.5) circle (0.5);
 ;; \draw[fill=green!50] (1,1)
