@@ -3,25 +3,15 @@
             [bluebell.latex.utils :as utils]
             [bluebell.latex.io-utils :as io-utils]))
 
-(def testdoc [[:documentclass :opt "a4paper" "article"]
-              [:title "Mjaoelimjao"]
-              [:begin "document"
-               :body
-               [:maketitle]
-               ["A line here\n" "Another line"]]])
-
-(defn doc-demo []
-  (io-utils/display testdoc))
-
 (defn tikz-demo []
   (io-utils/display-silent
    (utils/standalone
-    [:usepackage "tikz"]
-    [:begin "tikzpicture" :body
-     [[:draw :opt {:style "dashed"}]
+    [:usepackage [::latex/arg "tikz"]]
+    [::latex/block :tikzpicture
+     [[:draw {:style "dashed"}]
       "(2, .5) circle (0.5);"
 
-      [:draw :opt {:fill "green!50"}]
+      [:draw {:fill "green!50"}]
       "(1, 1)" "ellipse (.5 and 1);"
 
       ]])))

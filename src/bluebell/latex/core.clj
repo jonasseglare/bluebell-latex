@@ -6,14 +6,9 @@
   (spec/cat :prefix (partial = p)
             :value sp))
 
-(def reserved [:opt    ;; Optional arg prefix
-               :lower  ;; Lower, that is _
-               :upper  ;; Upper, that is ^
-               :body   ;; for the begin form
-               ])
-
 (defn str-sep [sep args]
-  (reduce #(str %1 sep %2) (map str args)))
+  (if (empty? args) "" 
+      (reduce #(str %1 sep %2) (map str args))))
 
 (defn str-lines [& args]
   (str-sep "\n" args))
@@ -21,21 +16,21 @@
 (defn str-space [& args]
   (str-sep " " args))
 
-(defn reserved? [x]
-  (contains? reserved x))
-
-(def not-reserved? (complement reserved?))
-
 (spec/def ::id (spec/cat :prefix (partial = ::id)
                          :value string?))
 
-(spec/def ::identifier (spec/or :keyword (spec/and keyword?
-                                                   #(not (qualified-keyword? %))
-                                                   not-reserved?)
+(spec/def ::identifier (spec/or :keyword (spec/and
+                                          keyword?
+                                          #(not (qualified-keyword? %)))
                                 :id ::id))
 
 (defn id [x]
   [::id x])
+
+(spec/def ::opt (prefixed ::opt ::forms))
+(spec/def ::arg (prefixed ::arg ::forms))
+(spec/def ::lower (prefixed ::lower ::forms))
+(spec/def ::upper (prefixed ::upper ::forms))
 
 (defmultiple/defmultiple identifier-to-str first
   (:keyword [[_ x]] (name x))
@@ -50,82 +45,81 @@
   (:keyword [[_ x]] (name x))
   (:string [[_ x]] x))
 
-(spec/def ::arg-value (spec/or :string string?
-                               :number number?))
+(spec/def ::map (spec/map-of ::arg-key ::form))
 
-(defmultiple/defmultiple arg-value-to-str first
-  (:string [[_ x]] x)
-  (:number [[_ x]] (str x)))
 
-(spec/def ::opt-arg-map (spec/map-of ::arg-key ::arg-value))
+(spec/def ::any-arg (spec/or :opt ::opt
+                             :arg ::arg
+                             :lower ::lower
+                             :upper ::upper
+                             :map ::map))
+
+(spec/def ::opts (spec/* ::opt))
+
 (spec/def ::number number?)
-
-
-(spec/def ::opt-arg (spec/or :map ::opt-arg-map
-                             :string ::string))
 
 (spec/def ::compound (spec/coll-of ::form))
 
+(spec/def ::block (prefixed ::block (spec/cat :pre-ops ::opts
+                                              :name ::identifier
+                                              :post-args ::args
+                                              :body ::forms)))
+
+(defn compile-block [x]
+  (let [id (identifier-to-str (:name x))]
+    (str "\\begin" (compile-args (:pre-opts x))
+         "{" id
+         "}" (compile-args (:post-args x))
+         "\n" (compile-forms "\n" (:body x)) "\n"
+         "\\end{" id "}")))
+
 (spec/def ::form (spec/or :command ::command
+                          :block ::block
                           :string ::string
                           :number ::number
                           :compound ::compound))
 
 (spec/def ::forms (spec/* ::form))
 
-(spec/def ::args ::forms)
-
-(spec/def ::command-setting (spec/alt :opt-arg (prefixed :opt ::opt-arg)
-                                      :lower (prefixed :lower ::form)
-                                      :upper (prefixed :upper ::form)))
-
-(spec/def ::command-settings (spec/* ::command-setting))
+(spec/def ::args (spec/* ::any-arg))
 
 (spec/def ::command (spec/cat :name ::identifier
-                              :settings ::command-settings
-                              :args ::args
-                              :body (spec/? (prefixed :body ::forms))))
+                              :args ::args))
 
 (defn parse [x]
   (spec/conform ::form x))
 
 (declare compile-form)
 
-(defn comma [a b] (str a "," b))
-
 (defn to-assignment [[k v]]
   (str (arg-key-to-str (spec/conform ::arg-key  k))
-       "=" (arg-value-to-str  v)))
+       "=" (compile-form v)))
 
-(defmultiple/defmultiple make-opt-arg first
-  (:map [[_ x]] (str "[" (reduce comma (map to-assignment x)) "]"))
-  (:string [[_ x]] (str "[" x "]")))
+(defn compile-map [x]
+  (str-sep "," (map to-assignment x)))
 
-(defmultiple/defmultiple make-setting first
-  (:opt-arg [[_ x]] (make-opt-arg (:value x)))
-  (:lower [[_ x]] (str "_{" (compile-form (:value  x)) "}"))
-  (:upper [[_ x]] (str "^{" (compile-form (:value  x)) "}")))
+(defn compile-forms [sep forms]
+  (str-sep sep (map compile-form forms)))
 
-(defn make-optional-args [x]
-  (apply str (map make-setting x)))
+(defn compile-opt [v]
+  (str "[" (compile-forms "" (:value v)) "]"))
 
-(defn to-arg [x]
-  (str "{" (compile-form x) "}"))
+(defn compile-arg [prefix v]
+  (str prefix "{" (compile-forms "" (:value v)) "}"))
 
-(defn make-args [x]
-  (apply str (map to-arg x)))
+(defmultiple/defmultiple compile-any-arg first
+  (:opt [[_ x]] (compile-opt x))
+  (:arg [[_ x]] (compile-arg "" x))
+  (:lower [[_ x]] (compile-arg "_" x))
+  (:upper [[_ x]] (compile-arg "^" x))
+  (:map [[_ x]] (str "[" (compile-map x) "]")))
 
-(defn make-body [name body]
-  (if body
-    (str "\n" (apply str-lines (map compile-form (:value body)))
-         "\n\\end{" (compile-form name) "}")
-    ""))
+(defn compile-args [v]
+  (apply str (map compile-any-arg v)))
 
 (defn compile-command [x]
   (str "\\" (identifier-to-str (:name x))
-       (make-optional-args (:settings x))
-       (make-args (:args  x))
-       (make-body (first (:args x)) (:body x))))
+       (compile-args (:args x))))
 
 
 (defn compile-compound [x]
@@ -135,6 +129,7 @@
   (:command [[_ x]] (compile-command x))
   (:string [[_ x]] x)
   (:number [[_ x]] (str x))
+  (:block [[_ x]] (compile-block (:value x)))
   (:compound [[_ x]] (compile-compound x)))
 
 (defn full-compile [x]

@@ -1,6 +1,8 @@
-(ns bluebell.latex.utils)
+(ns bluebell.latex.utils
+  (:require [bluebell.latex.core :as latex]))
 
 (defn standalone [header body]
-  [[:documentclass "standalone"] ;; tlmgr install standalone
+  [[:documentclass [::latex/arg "standalone"]] ;; tlmgr install standalone
    header
-   [:begin "document" :body body]])
+   [::latex/block :document
+    body]])
