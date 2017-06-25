@@ -27,7 +27,7 @@
 (defn id [x]
   [::id x])
 
-(spec/def ::opt (prefixed ::opt ::forms))
+(spec/def ::opt (prefixed ::opt ::opt-args))
 (spec/def ::arg (prefixed ::arg ::forms))
 (spec/def ::lower (prefixed ::lower ::forms))
 (spec/def ::upper (prefixed ::upper ::forms))
@@ -102,7 +102,7 @@
   (str-sep sep (map compile-form forms)))
 
 (defn compile-opt [v]
-  (str "[" (compile-forms "" (:value v)) "]"))
+  (str "[" (compile-forms "," (:value v)) "]"))
 
 (defn compile-arg [prefix v]
   (str prefix "{" (compile-forms "" (:value v)) "}"))
@@ -130,7 +130,8 @@
   (:string [[_ x]] x)
   (:number [[_ x]] (str x))
   (:block [[_ x]] (compile-block (:value x)))
-  (:compound [[_ x]] (compile-compound x)))
+  (:compound [[_ x]] (compile-compound x))
+  (:map [[_ x]] (compile-map x)))
 
 (defn full-compile [x]
   (-> x
