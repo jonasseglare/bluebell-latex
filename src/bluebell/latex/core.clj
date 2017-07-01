@@ -27,7 +27,8 @@
 (defn id [x]
   [::id x])
 
-(spec/def ::opt (prefixed ::opt ::opt-args))
+
+(spec/def ::opt (prefixed ::opt ::forms))
 (spec/def ::arg (prefixed ::arg ::forms))
 (spec/def ::lower (prefixed ::lower ::forms))
 (spec/def ::upper (prefixed ::upper ::forms))
@@ -65,13 +66,7 @@
                                               :post-args ::args
                                               :body ::forms)))
 
-(defn compile-block [x]
-  (let [id (identifier-to-str (:name x))]
-    (str "\\begin" (compile-args (:pre-opts x))
-         "{" id
-         "}" (compile-args (:post-args x))
-         "\n" (compile-forms "\n" (:body x)) "\n"
-         "\\end{" id "}")))
+
 
 (spec/def ::form (spec/or :command ::command
                           :block ::block
@@ -124,6 +119,14 @@
 
 (defn compile-compound [x]
   (apply str-space (map compile-form x)))
+
+(defn compile-block [x]
+  (let [id (identifier-to-str (:name x))]
+    (str "\\begin" (compile-args (:pre-opts x))
+         "{" id
+         "}" (compile-args (:post-args x))
+         "\n" (compile-forms "\n" (:body x)) "\n"
+         "\\end{" id "}")))
 
 (defmultiple/defmultiple compile-form first
   (:command [[_ x]] (compile-command x))
