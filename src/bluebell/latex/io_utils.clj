@@ -48,5 +48,6 @@
    (display code settings)))
 
 (defn display-silent [& args]
-  (do (apply display args)
-      nil))
+  (let [r (apply display args)]
+    (if (tag/failure? r)
+      r)))

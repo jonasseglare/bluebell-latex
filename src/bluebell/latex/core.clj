@@ -1,5 +1,6 @@
 (ns bluebell.latex.core
   (:require [clojure.spec :as spec]
+            [bluebell.utils.failure :as failure]
             [bluebell.utils.defmultiple :as defmultiple]))
 
 (defn prefixed [p sp]
@@ -82,7 +83,10 @@
                               :args ::args))
 
 (defn parse [x]
-  (spec/conform ::form x))
+  (let [p (spec/conform ::form x)]
+    (if (= p ::spec/invalid)
+      (failure/failure (spec/explain-str ::form x))
+      p)))
 
 (declare compile-form)
 
@@ -137,6 +141,4 @@
   (:map [[_ x]] (compile-map x)))
 
 (defn full-compile [x]
-  (-> x
-      parse
-      compile-form))
+  ((failure/wrapf compile-form) (parse x)))
