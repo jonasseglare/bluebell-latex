@@ -54,7 +54,13 @@
   (string/join-strings " " args))
 
 (defn rows [& args]
-  (string/join-strings "\\\\" args))
+  (let [n (count args)]
+    (mapv (fn [i x]
+            (if (= i (- n 1))
+              x
+              (indent/cat x "\\\\")))
+          (range n)
+          args)))
 
 (defn cols [& args]
   (string/join-strings " & " args))
