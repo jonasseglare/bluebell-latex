@@ -50,13 +50,17 @@
     {:name "document"}
     body)])
 
+(defn spaced [& args]
+  (string/join-strings " " args))
 
+(defn rows [& args]
+  (string/join-strings "\\\\" args))
 
+(defn cols [& args]
+  (string/join-strings " & " args))
 
-
-
-
-
+(defn tabular [colspec & args]
+  (apply block `(~{:name "tabular" :post (br colspec)} ~@args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; how to render it
 (defn render [x]
