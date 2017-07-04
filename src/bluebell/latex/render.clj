@@ -4,5 +4,5 @@
             [bluebell.utils.indent :as indent]
             [bluebell.utils.defmultiple :as defmultiple]))
 
-(defn full-compile [x]
+(defn render [x]
   (indent/render x))
