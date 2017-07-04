@@ -4,16 +4,11 @@
 
 (defn tikz-demo []
   (io-utils/display-silent
-   (utils/standalone
-    [:usepackage [::latex/arg "tikz"]]
-    [::latex/block :tikzpicture
-     [[:draw {:style "dashed"}]
-      "(2, .5) circle (0.5);"
-
-      [:draw {:fill "green!50"}]
-      "(1, 1)" "ellipse (.5 and 1);"
-
-      ]])))
+   (latex/standalone
+    (latex/usepackage "tikz")
+    (latex/block {:name "tikzpicture"}
+                 (latex/cmd "draw" (latex/sq "style=dashed") " (2, .5) circle (0.5);")
+                 (latex/cmd "draw" (latex/sq "fill=green!50") " (1, 1) ellipse (.5 and 1);")))))
 ;; begin{tikzpicture}
 ;; \draw[style=dashed] (2,.5) circle (0.5);
 ;; \draw[fill=green!50] (1,1)

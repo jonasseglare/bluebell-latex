@@ -32,7 +32,7 @@
   ([code settings]
    (do
      (spit (full-name settings ".tex")
-           (latex/full-compile code))
+           (latex/render code))
      (perform-compilation settings)))
   ([code]
    (to-pdf code settings)))
