@@ -42,3 +42,10 @@
 (defn inline-math [& args]
   (apply str `("$" ~@ args "$")))
 
+(defn standalone
+  [header body]
+  [(cmd "documentclass" (br "standalone")) 
+   header
+   (block
+    {:name "document"}
+    body)])
