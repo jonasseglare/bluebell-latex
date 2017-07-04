@@ -1,6 +1,5 @@
 (ns bluebell.latex.example
   (:require [bluebell.latex.core :as latex]
-            [bluebell.latex.utils :as utils]
             [bluebell.latex.io-utils :as io-utils]))
 
 (defn tikz-demo []

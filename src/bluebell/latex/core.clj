@@ -49,3 +49,15 @@
    (block
     {:name "document"}
     body)])
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; how to render it
+(defn render [x]
+  (indent/render x))
